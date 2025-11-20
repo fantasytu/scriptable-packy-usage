@@ -1,5 +1,7 @@
 # Packy Usage Widget
 
+[English](./README.md) | [中文](./README.zh-CN.md)
+
 A powerful Scriptable widget for iOS that displays your API usage statistics in real-time. Monitor your balance, spending, and model usage directly from your home screen.
 
 **Author:** Fantasy

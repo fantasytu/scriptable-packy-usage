@@ -47,12 +47,22 @@ class ColorManager {
   static MODEL_COLORS = {
     'gpt-5': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
     'gpt-5-codex': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
+    'gpt-5-codex-mini': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
+    'gpt-5-codex-mini-high': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
+    'gpt-5-codex-mini-medium': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
+    'gpt-5-codex-high': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
+    'gpt-5-codex-medium': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
+    'gpt-5-codex-low': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
     'gpt-5-high': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
     'gpt-5-low': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
     'gpt-5-medium': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
     'gpt-5-minimal': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
     'gpt-5.1': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
     'gpt-5.1-codex': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
+    'gpt-5.1-codex-mini': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
+    'gpt-5.1-codex-max': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
+    'gpt-5.1-codex-max-high': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
+    'gpt-5.1-codex-max-xhigh': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
     'gpt-5.1-high': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
     'gpt-5.1-low': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
     'gpt-5.1-medium': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
@@ -74,6 +84,10 @@ class ColorManager {
     'gemini-2.5-pro': Color.dynamic(new Color("#9D4EDD"), new Color("#B565F2")),
     'gemini-2.5-pro-nothinking': Color.dynamic(new Color("#9D4EDD"), new Color("#B565F2")),
     'gemini-2.5-pro-thinking': Color.dynamic(new Color("#9D4EDD"), new Color("#B565F2")),
+    'gemini-3-pro': Color.dynamic(new Color("#7C3AED"), new Color("#A78BFA")),
+    'gemini-3-pro-low': Color.dynamic(new Color("#7C3AED"), new Color("#A78BFA")),
+    'gemini-3-pro-high': Color.dynamic(new Color("#7C3AED"), new Color("#A78BFA")),
+    'gemini-3-pro-preview': Color.dynamic(new Color("#7C3AED"), new Color("#A78BFA")),
     'sora_video2': Color.dynamic(new Color("#34C759"), new Color("#30D158")),
     'veo_3_1': Color.dynamic(new Color("#28A745"), new Color("#32CD32")),
     'veo_3_1-fast': Color.dynamic(new Color("#28A745"), new Color("#32CD32")),
@@ -87,22 +101,67 @@ class ColorManager {
 
   static getSimplifiedModelName(modelName) {
     if (!modelName || modelName.trim() === '') return 'No Model Used';
-    
-    if (modelName.includes('gpt-5.1')) return 'GPT 5.1';
-    if (modelName.includes('gpt-5')) return 'GPT 5';
-    if (modelName.includes('sora')) return 'Sora';
-    if (modelName.includes('veo')) return 'VeO';
 
+    // GPT models
+    if (modelName.includes('gpt-5.1')) {
+      if (modelName.includes('codex')) {
+        if (modelName.includes('max-xhigh')) return 'GPT 5.1 Max XHi';
+        if (modelName.includes('max-high')) return 'GPT 5.1 Max Hi';
+        if (modelName.includes('max')) return 'GPT 5.1 Max';
+        if (modelName.includes('mini')) return 'GPT 5.1 Mini';
+        return 'GPT 5.1 Codex';
+      }
+      if (modelName.includes('high')) return 'GPT 5.1 Hi';
+      if (modelName.includes('low')) return 'GPT 5.1 Lo';
+      if (modelName.includes('medium')) return 'GPT 5.1 Med';
+      if (modelName.includes('minimal')) return 'GPT 5.1 Min';
+      return 'GPT 5.1';
+    }
+
+    if (modelName.includes('gpt-5')) {
+      if (modelName.includes('codex')) {
+        if (modelName.includes('mini')) {
+          if (modelName.includes('medium')) return 'GPT 5 Mini Med';
+          if (modelName.includes('high')) return 'GPT 5 Mini Hi';
+          return 'GPT 5 Mini';
+        }
+        if (modelName.includes('high')) return 'GPT 5 Codex Hi';
+        if (modelName.includes('medium')) return 'GPT 5 Codex Med';
+        if (modelName.includes('low')) return 'GPT 5 Codex Lo';
+        return 'GPT 5 Codex';
+      }
+      if (modelName.includes('high')) return 'GPT 5 Hi';
+      if (modelName.includes('low')) return 'GPT 5 Lo';
+      if (modelName.includes('medium')) return 'GPT 5 Med';
+      if (modelName.includes('minimal')) return 'GPT 5 Min';
+      return 'GPT 5';
+    }
+
+    // Claude models
     if (modelName.includes('claude')) {
       if (modelName.includes('opus')) return 'Claude Opus';
       if (modelName.includes('sonnet')) return 'Claude Sonnet';
       if (modelName.includes('haiku')) return 'Claude Haiku';
     }
 
+    // Gemini models
     if (modelName.includes('gemini')) {
-      if (modelName.includes('pro')) return 'Gemini Pro';
-      if (modelName.includes('flash')) return 'Gemini Flash';
+      if (modelName.includes('gemini-3')) {
+        if (modelName.includes('low')) return 'Gemini 3 Lo';
+        if (modelName.includes('high')) return 'Gemini 3 Hi';
+        if (modelName.includes('preview')) return 'Gemini 3 Pre';
+        return 'Gemini 3';
+      }
+      if (modelName.includes('gemini-2.5')) {
+        if (modelName.includes('pro')) return 'Gemini 2.5 Pro';
+        if (modelName.includes('flash')) return 'Gemini 2.5 Flash';
+      }
+      return 'Gemini';
     }
+
+    // Video/Image models
+    if (modelName.includes('sora')) return 'Sora';
+    if (modelName.includes('veo')) return 'VeO';
 
     return modelName;
   }
@@ -418,7 +477,7 @@ class UIComponents {
       remainingBar.addSpacer();
     }
 
-    // Usage bar with DrawContext
+    // Usage bar with Stack background
     const amounts = weekData.map(day =>
       Object.values(day.models).reduce((sum, quota) => sum + quota / CONFIG.UNIT, 0)
     );
@@ -433,31 +492,31 @@ class UIComponents {
     const barWidth = width - padding * 2;
     const sidePadding = 2; // Padding on both sides of the bar
 
-    // Create DrawContext
-    const ctx = new DrawContext();
-    ctx.size = new Size(barWidth, barHeight);
-    ctx.opaque = false;
-    ctx.respectScreenScale = true;
+    // Create bar background and progress using Stack
+    const usageBarStack = container.addStack();
+    usageBarStack.layoutHorizontally();
+    usageBarStack.cornerRadius = barHeight / 2;
+    usageBarStack.backgroundColor = ColorManager.progressBackground;
+    usageBarStack.size = new Size(barWidth, barHeight);
 
-    // Draw background bar
-    ctx.setFillColor(ColorManager.progressBackground);
-    const bgPath = new Path();
-    bgPath.addRoundedRect(new Rect(0, 0, barWidth, barHeight), barHeight / 2, barHeight / 2);
-    ctx.addPath(bgPath);
-    ctx.fillPath();
+    // Create DrawContext
+    const ctxProgress = new DrawContext();
+    ctxProgress.size = new Size(barWidth, barHeight);
+    ctxProgress.opaque = false;
+    ctxProgress.respectScreenScale = true;
 
     // Draw progress bar (no left padding, progress grows from left)
     const progressWidth = todayRatio * barWidth;
     if (progressWidth > 0) {
-      ctx.setFillColor(ColorManager.usageProgress);
+      ctxProgress.setFillColor(ColorManager.usageProgress);
       const progressPath = new Path();
       progressPath.addRoundedRect(
         new Rect(0, 0, progressWidth, barHeight),
         barHeight / 2,
         barHeight / 2
       );
-      ctx.addPath(progressPath);
-      ctx.fillPath();
+      ctxProgress.addPath(progressPath);
+      ctxProgress.fillPath();
     }
 
     // Label configuration
@@ -482,17 +541,15 @@ class UIComponents {
     const distanceBetweenLabels = maxStartX - avgEndX;
     const showMax = distanceBetweenLabels >= minLabelSpacing && max > 0;
 
-    // Draw AVG label
-    ctx.setTextColor(ColorManager.background);
-    ctx.setFont(Font.boldSystemFont(fontSize));
-    ctx.drawText(avgLabel, new Point(avgStartX, (barHeight - fontSize) / 2 - 1));
+    ctxProgress.setTextColor(ColorManager.background);
+    ctxProgress.setFont(Font.boldSystemFont(fontSize));
+    ctxProgress.drawText(avgLabel, new Point(avgStartX, (barHeight - fontSize) / 2 - 1));
 
-    // Draw MAX label if there's enough space
     if (showMax) {
-      ctx.drawText("MAX •", new Point(maxStartX, (barHeight - fontSize) / 2 - 1));
+      ctxProgress.drawText("MAX •", new Point(maxStartX, (barHeight - fontSize) / 2 - 1));
     }
 
-    const usageBarImage = container.addImage(ctx.getImage());
+    const usageBarImage = usageBarStack.addImage(ctxProgress.getImage());
     usageBarImage.imageSize = new Size(barWidth, barHeight);
 
     return container;
@@ -638,18 +695,19 @@ class ChartRenderer {
 
     const sortedModels = Object.entries(modelUsageData).sort((a, b) => a[1] - b[1]);
 
+    // Background bar using Stack
+    const barStack = rangeContainer.addStack();
+    barStack.layoutHorizontally();
+    barStack.cornerRadius = barHeight / 2;
+    barStack.backgroundColor = ColorManager.backgroundAlt;
+    barStack.size = new Size(width, barHeight);
+    barStack.centerAlignContent();
+
+    // Draw model dots using DrawContext
     const ctx = new DrawContext();
     ctx.size = new Size(width, rangeHeight);
     ctx.opaque = false;
     ctx.respectScreenScale = true;
-
-    // Background bar
-    ctx.setFillColor(ColorManager.backgroundAlt);
-    const barY = (rangeHeight - barHeight) / 2;
-    const path = new Path();
-    path.addRoundedRect(new Rect(0, barY, width, barHeight), barHeight / 2, barHeight / 2);
-    ctx.addPath(path);
-    ctx.fillPath();
 
     // Model dots
     sortedModels.forEach(([modelName, usage]) => {
@@ -665,7 +723,7 @@ class ChartRenderer {
       ctx.strokeEllipse(new Rect(xPos + 1, yPos + 1, dotSize - 2, dotSize - 2));
     });
 
-    const rangeImage = rangeContainer.addImage(ctx.getImage());
+    const rangeImage = barStack.addImage(ctx.getImage());
     rangeImage.imageSize = new Size(width, rangeHeight);
 
     // Labels
