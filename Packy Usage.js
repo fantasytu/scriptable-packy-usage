@@ -1,6 +1,7 @@
 // ================= PACKY USAGE WIDGET ==================
 // Author: Fantasy Tu
-// Date: 2025-11-19
+// Version: 1.2.0
+// Date: 2025-11-21
 // Description: A Scriptable widget to display API usage statistics
 // ======================================================
 
@@ -11,6 +12,7 @@ const CONFIG = {
   SESSION: "",
   UNIT: 500000,
   DAYS_TO_FETCH: 30,
+  DEBUG: false, // Set to false to disable debug mode
 };
 
 const UI_CONSTANTS = {
@@ -32,144 +34,178 @@ const UI_CONSTANTS = {
   },
 };
 
-// ================= COLOR MANAGER CLASS ==================
-class ColorManager {
-  static primary = Color.dynamic(new Color("#000000"), new Color("#FFFFFF"));
-  static secondary = Color.dynamic(new Color("#8E8E93"), new Color("#636366"));
-  static background = Color.dynamic(new Color("#F2F2F7"), new Color("#1C1C1E"));
-  static backgroundMid = Color.dynamic(new Color("#EBEBF0"), new Color("#2C2C2E"));
-  static backgroundAlt = Color.dynamic(new Color("#E5E5EA"), new Color("#3A3A3C"));
-  static progressBackground = Color.dynamic(new Color("#D1D1D6"), new Color("#48484A"));
-  static usageProgress = Color.dynamic(new Color("#5E5CE6"), new Color("#5E5CE6"));
-  static error = Color.dynamic(new Color("#FF3B30"), new Color("#FF453A"));
-  static success = Color.dynamic(new Color("#34C759"), new Color("#30D158"));
+// ================= COLOR MANAGER ==================
+const ColorManager = new Proxy({
+  // All color definitions in one place
+  COLOR_DEFS: {
+    // UI colors
+    primary: { light: "#000000", dark: "#FFFFFF" },
+    secondary: { light: "#8E8E93", dark: "#636366" },
+    background: { light: "#F2F2F7", dark: "#1C1C1E" },
+    backgroundMid: { light: "#EBEBF0", dark: "#2C2C2E" },
+    backgroundAlt: { light: "#E5E5EA", dark: "#3A3A3C" },
+    progressBackground: { light: "#D1D1D6", dark: "#48484A" },
+    usageProgress: { light: "#5E5CE6", dark: "#5E5CE6" },
+    error: { light: "#FF3B30", dark: "#FF453A" },
+    success: { light: "#34C759", dark: "#30D158" },
+    warning: { light: "#FF9500", dark: "#FF9F0A" },
+    // Model colors
+    'gpt-5': { light: "#007AFF", dark: "#0A84FF" },
+    'gpt-5.1': { light: "#0052CC", dark: "#0066FF" },
+    'claude-haiku': { light: "#FFB800", dark: "#FFD60A" },
+    'claude-sonnet': { light: "#FF8C00", dark: "#FFAB00" },
+    'claude-opus': { light: "#FF3B00", dark: "#FF5733" },
+    'gemini-2.5-flash': { light: "#C77DFF", dark: "#D896FF" },
+    'gemini-2.5-pro': { light: "#9D4EDD", dark: "#B565F2" },
+    'gemini-3': { light: "#7C3AED", dark: "#A78BFA" },
+    'sora': { light: "#34C759", dark: "#30D158" },
+    'veo': { light: "#28A745", dark: "#32CD32" },
+    'default': { light: "#32D74B", dark: "#28A745" },
+  },
 
-  static MODEL_COLORS = {
-    'gpt-5': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5-codex': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5-codex-mini': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5-codex-mini-high': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5-codex-mini-medium': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5-codex-high': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5-codex-medium': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5-codex-low': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5-high': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5-low': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5-medium': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5-minimal': Color.dynamic(new Color("#007AFF"), new Color("#0A84FF")),
-    'gpt-5.1': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
-    'gpt-5.1-codex': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
-    'gpt-5.1-codex-mini': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
-    'gpt-5.1-codex-max': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
-    'gpt-5.1-codex-max-high': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
-    'gpt-5.1-codex-max-xhigh': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
-    'gpt-5.1-high': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
-    'gpt-5.1-low': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
-    'gpt-5.1-medium': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
-    'gpt-5.1-minimal': Color.dynamic(new Color("#0052CC"), new Color("#0066FF")),
-    'claude-3-5-haiku-20241022': Color.dynamic(new Color("#FFB800"), new Color("#FFD60A")),
-    'claude-haiku-4-5-20251001': Color.dynamic(new Color("#FFB800"), new Color("#FFD60A")),
-    'claude-3-5-sonnet-20240620': Color.dynamic(new Color("#FF8C00"), new Color("#FFAB00")),
-    'claude-3-5-sonnet-20241022': Color.dynamic(new Color("#FF8C00"), new Color("#FFAB00")),
-    'claude-3-7-sonnet-20250219': Color.dynamic(new Color("#FF8C00"), new Color("#FFAB00")),
-    'claude-sonnet-4-20250514': Color.dynamic(new Color("#FF8C00"), new Color("#FFAB00")),
-    'claude-sonnet-4-5-20250929': Color.dynamic(new Color("#FF8C00"), new Color("#FFAB00")),
-    'claude-sonnet-4-5-20250929-thinking': Color.dynamic(new Color("#FF8C00"), new Color("#FFAB00")),
-    'claude-opus-4-1-20250805': Color.dynamic(new Color("#FF3B00"), new Color("#FF5733")),
-    'claude-opus-4-20250514': Color.dynamic(new Color("#FF3B00"), new Color("#FF5733")),
-    'gemini-2.5-flash': Color.dynamic(new Color("#C77DFF"), new Color("#D896FF")),
-    'gemini-2.5-flash-image': Color.dynamic(new Color("#C77DFF"), new Color("#D896FF")),
-    'gemini-2.5-flash-nothinking': Color.dynamic(new Color("#C77DFF"), new Color("#D896FF")),
-    'gemini-2.5-flash-thinking': Color.dynamic(new Color("#C77DFF"), new Color("#D896FF")),
-    'gemini-2.5-pro': Color.dynamic(new Color("#9D4EDD"), new Color("#B565F2")),
-    'gemini-2.5-pro-nothinking': Color.dynamic(new Color("#9D4EDD"), new Color("#B565F2")),
-    'gemini-2.5-pro-thinking': Color.dynamic(new Color("#9D4EDD"), new Color("#B565F2")),
-    'gemini-3-pro': Color.dynamic(new Color("#7C3AED"), new Color("#A78BFA")),
-    'gemini-3-pro-low': Color.dynamic(new Color("#7C3AED"), new Color("#A78BFA")),
-    'gemini-3-pro-high': Color.dynamic(new Color("#7C3AED"), new Color("#A78BFA")),
-    'gemini-3-pro-preview': Color.dynamic(new Color("#7C3AED"), new Color("#A78BFA")),
-    'sora_video2': Color.dynamic(new Color("#34C759"), new Color("#30D158")),
-    'veo_3_1': Color.dynamic(new Color("#28A745"), new Color("#32CD32")),
-    'veo_3_1-fast': Color.dynamic(new Color("#28A745"), new Color("#32CD32")),
-    'veo_3_1-landscape-fast': Color.dynamic(new Color("#28A745"), new Color("#32CD32")),
-    'veo_3_1-portrait-fast': Color.dynamic(new Color("#28A745"), new Color("#32CD32")),
-  };
+  getRemainingPercentageColor(percentage) {
+    if (percentage >= UI_CONSTANTS.THRESHOLDS.GOOD) return this.success;
+    if (percentage <= UI_CONSTANTS.THRESHOLDS.WARNING) return this.error;
+    return this.warning;
+  },
+
+  getDrawColor(colorKey) {
+    const colorDef = this.COLOR_DEFS[colorKey];
+    return Device.isUsingDarkAppearance() ? new Color(colorDef.dark) : new Color(colorDef.light);
+  }
+
+}, {
+  get(target, prop) {
+    // Return existing properties (methods, COLOR_DEFS, etc.)
+    if (prop in target) {
+      return target[prop];
+    }
+
+    // If it's a color definition key, return the dynamic color
+    if (prop in target.COLOR_DEFS) {
+      const colorDef = target.COLOR_DEFS[prop];
+      return Color.dynamic(new Color(colorDef.light), new Color(colorDef.dark));
+    }
+
+    return undefined;
+  }
+});
+
+// ================= MODEL MANAGER CLASS ==================
+class ModelManager {
+  static MODEL_CONFIGS = [
+    // GPT 5.1 variants (more specific patterns first)
+    { pattern: ['gpt-5.1', 'codex', 'max-xhigh'], name: 'GPT 5.1 Max XHi', colorKey: 'gpt-5.1' },
+    { pattern: ['gpt-5.1', 'codex', 'max-high'], name: 'GPT 5.1 Max Hi', colorKey: 'gpt-5.1' },
+    { pattern: ['gpt-5.1', 'codex', 'max'], name: 'GPT 5.1 Max', colorKey: 'gpt-5.1' },
+    { pattern: ['gpt-5.1', 'codex', 'mini'], name: 'GPT 5.1 Mini', colorKey: 'gpt-5.1' },
+    { pattern: ['gpt-5.1', 'codex'], name: 'GPT 5.1 Codex', colorKey: 'gpt-5.1' },
+    { pattern: ['gpt-5.1', 'high'], name: 'GPT 5.1 Hi', colorKey: 'gpt-5.1' },
+    { pattern: ['gpt-5.1', 'low'], name: 'GPT 5.1 Lo', colorKey: 'gpt-5.1' },
+    { pattern: ['gpt-5.1', 'medium'], name: 'GPT 5.1 Med', colorKey: 'gpt-5.1' },
+    { pattern: ['gpt-5.1', 'minimal'], name: 'GPT 5.1 Min', colorKey: 'gpt-5.1' },
+    { pattern: ['gpt-5.1'], name: 'GPT 5.1', colorKey: 'gpt-5.1' },
+    // GPT 5 variants
+    { pattern: ['gpt-5', 'codex', 'mini', 'medium'], name: 'GPT 5 Mini Med', colorKey: 'gpt-5' },
+    { pattern: ['gpt-5', 'codex', 'mini', 'high'], name: 'GPT 5 Mini Hi', colorKey: 'gpt-5' },
+    { pattern: ['gpt-5', 'codex', 'mini'], name: 'GPT 5 Mini', colorKey: 'gpt-5' },
+    { pattern: ['gpt-5', 'codex', 'high'], name: 'GPT 5 Codex Hi', colorKey: 'gpt-5' },
+    { pattern: ['gpt-5', 'codex', 'medium'], name: 'GPT 5 Codex Med', colorKey: 'gpt-5' },
+    { pattern: ['gpt-5', 'codex', 'low'], name: 'GPT 5 Codex Lo', colorKey: 'gpt-5' },
+    { pattern: ['gpt-5', 'codex'], name: 'GPT 5 Codex', colorKey: 'gpt-5' },
+    { pattern: ['gpt-5', 'high'], name: 'GPT 5 Hi', colorKey: 'gpt-5' },
+    { pattern: ['gpt-5', 'low'], name: 'GPT 5 Lo', colorKey: 'gpt-5' },
+    { pattern: ['gpt-5', 'medium'], name: 'GPT 5 Med', colorKey: 'gpt-5' },
+    { pattern: ['gpt-5', 'minimal'], name: 'GPT 5 Min', colorKey: 'gpt-5' },
+    { pattern: ['gpt-5'], name: 'GPT 5', colorKey: 'gpt-5' },
+    // Claude models
+    { pattern: ['claude', 'opus'], name: 'Claude Opus', colorKey: 'claude-opus' },
+    { pattern: ['claude', 'sonnet'], name: 'Claude Sonnet', colorKey: 'claude-sonnet' },
+    { pattern: ['claude', 'haiku'], name: 'Claude Haiku', colorKey: 'claude-haiku' },
+    // Gemini models
+    { pattern: ['gemini-3', 'low'], name: 'Gemini 3 Lo', colorKey: 'gemini-3' },
+    { pattern: ['gemini-3', 'high'], name: 'Gemini 3 Hi', colorKey: 'gemini-3' },
+    { pattern: ['gemini-3', 'preview'], name: 'Gemini 3 Pre', colorKey: 'gemini-3' },
+    { pattern: ['gemini-3'], name: 'Gemini 3', colorKey: 'gemini-3' },
+    { pattern: ['gemini-2.5', 'pro'], name: 'Gemini 2.5 Pro', colorKey: 'gemini-2.5-pro' },
+    { pattern: ['gemini-2.5', 'flash'], name: 'Gemini 2.5 Flash', colorKey: 'gemini-2.5-flash' },
+    { pattern: ['gemini'], name: 'Gemini', colorKey: 'gemini-3' },
+    // Video/Image models
+    { pattern: ['sora'], name: 'Sora', colorKey: 'sora' },
+    { pattern: ['veo'], name: 'VeO', colorKey: 'veo' },
+  ];
+
+  static getModelConfig(modelName) {
+    return this.MODEL_CONFIGS.find(({ pattern }) =>
+      pattern.every(p => modelName.includes(p))
+    );
+  }
+
+  static getModelColorKey(modelName) {
+    const config = this.getModelConfig(modelName);
+    return config ? config.colorKey : 'default';
+  }
 
   static getModelColor(modelName) {
-    return this.MODEL_COLORS[modelName] || Color.dynamic(new Color("#32D74B"), new Color("#28A745"));
+    const key = this.getModelColorKey(modelName);
+    const colorDef = ColorManager.COLOR_DEFS[key];
+    return Color.dynamic(new Color(colorDef.light), new Color(colorDef.dark));
   }
 
   static getSimplifiedModelName(modelName) {
     if (!modelName || modelName.trim() === '') return 'No Model Used';
 
-    // GPT models
-    if (modelName.includes('gpt-5.1')) {
-      if (modelName.includes('codex')) {
-        if (modelName.includes('max-xhigh')) return 'GPT 5.1 Max XHi';
-        if (modelName.includes('max-high')) return 'GPT 5.1 Max Hi';
-        if (modelName.includes('max')) return 'GPT 5.1 Max';
-        if (modelName.includes('mini')) return 'GPT 5.1 Mini';
-        return 'GPT 5.1 Codex';
-      }
-      if (modelName.includes('high')) return 'GPT 5.1 Hi';
-      if (modelName.includes('low')) return 'GPT 5.1 Lo';
-      if (modelName.includes('medium')) return 'GPT 5.1 Med';
-      if (modelName.includes('minimal')) return 'GPT 5.1 Min';
-      return 'GPT 5.1';
-    }
-
-    if (modelName.includes('gpt-5')) {
-      if (modelName.includes('codex')) {
-        if (modelName.includes('mini')) {
-          if (modelName.includes('medium')) return 'GPT 5 Mini Med';
-          if (modelName.includes('high')) return 'GPT 5 Mini Hi';
-          return 'GPT 5 Mini';
-        }
-        if (modelName.includes('high')) return 'GPT 5 Codex Hi';
-        if (modelName.includes('medium')) return 'GPT 5 Codex Med';
-        if (modelName.includes('low')) return 'GPT 5 Codex Lo';
-        return 'GPT 5 Codex';
-      }
-      if (modelName.includes('high')) return 'GPT 5 Hi';
-      if (modelName.includes('low')) return 'GPT 5 Lo';
-      if (modelName.includes('medium')) return 'GPT 5 Med';
-      if (modelName.includes('minimal')) return 'GPT 5 Min';
-      return 'GPT 5';
-    }
-
-    // Claude models
-    if (modelName.includes('claude')) {
-      if (modelName.includes('opus')) return 'Claude Opus';
-      if (modelName.includes('sonnet')) return 'Claude Sonnet';
-      if (modelName.includes('haiku')) return 'Claude Haiku';
-    }
-
-    // Gemini models
-    if (modelName.includes('gemini')) {
-      if (modelName.includes('gemini-3')) {
-        if (modelName.includes('low')) return 'Gemini 3 Lo';
-        if (modelName.includes('high')) return 'Gemini 3 Hi';
-        if (modelName.includes('preview')) return 'Gemini 3 Pre';
-        return 'Gemini 3';
-      }
-      if (modelName.includes('gemini-2.5')) {
-        if (modelName.includes('pro')) return 'Gemini 2.5 Pro';
-        if (modelName.includes('flash')) return 'Gemini 2.5 Flash';
-      }
-      return 'Gemini';
-    }
-
-    // Video/Image models
-    if (modelName.includes('sora')) return 'Sora';
-    if (modelName.includes('veo')) return 'VeO';
-
-    return modelName;
+    const config = this.getModelConfig(modelName);
+    return config ? config.name : modelName;
   }
+}
 
-  static getRemainingPercentageColor(percentage) {
-    if (percentage >= UI_CONSTANTS.THRESHOLDS.GOOD) return Color.green();
-    if (percentage <= UI_CONSTANTS.THRESHOLDS.WARNING) return Color.red();
-    return Color.yellow();
+// ================= SIZE MANAGER CLASS ==================
+class SizeManager {
+  static DEVICE_SIZES = {
+    // iOS devices (screen widths: 320, 375, 390, 393, 414, 428, 430)
+    320: { small: { w: 141, h: 141 }, medium: { w: 292, h: 141 }, large: { w: 292, h: 311 } },
+    375: { small: { w: 155, h: 155 }, medium: { w: 329, h: 155 }, large: { w: 329, h: 345 } },
+    390: { small: { w: 158, h: 158 }, medium: { w: 338, h: 158 }, large: { w: 338, h: 354 } },
+    393: { small: { w: 158, h: 158 }, medium: { w: 338, h: 158 }, large: { w: 338, h: 354 } },
+    414: { small: { w: 169, h: 169 }, medium: { w: 360, h: 169 }, large: { w: 360, h: 379 } },
+    428: { small: { w: 170, h: 170 }, medium: { w: 364, h: 170 }, large: { w: 364, h: 382 } },
+    430: { small: { w: 170, h: 170 }, medium: { w: 364, h: 170 }, large: { w: 364, h: 382 } },
+    // iPadOS devices (screen widths: 744, 768, 810, 820, 834, 954, 1024, 1192)
+    744: { small: { w: 141, h: 141 }, medium: { w: 305, h: 141 }, large: { w: 305, h: 305 }, extraLarge: { w: 634, h: 305 } },
+    768: { small: { w: 141, h: 141 }, medium: { w: 305, h: 141 }, large: { w: 305, h: 305 }, extraLarge: { w: 634, h: 305 } },
+    810: { small: { w: 146, h: 146 }, medium: { w: 320, h: 146 }, large: { w: 320, h: 320 }, extraLarge: { w: 669, h: 320 } },
+    820: { small: { w: 155, h: 155 }, medium: { w: 342, h: 155 }, large: { w: 342, h: 342 }, extraLarge: { w: 715, h: 342 } },
+    834: { small: { w: 155, h: 155 }, medium: { w: 342, h: 155 }, large: { w: 342, h: 342 }, extraLarge: { w: 715, h: 342 } },
+    954: { small: { w: 162, h: 162 }, medium: { w: 350, h: 162 }, large: { w: 350, h: 350 }, extraLarge: { w: 726, h: 350 } },
+    1024: { small: { w: 170, h: 170 }, medium: { w: 378, h: 170 }, large: { w: 378, h: 378 }, extraLarge: { w: 795, h: 378 } },
+    1192: { small: { w: 188, h: 188 }, medium: { w: 412, h: 188 }, large: { w: 412, h: 412 }, extraLarge: { w: 860, h: 412 } },
+  };
+
+  static getWidgetSize(horizontalPadding = 0, verticalPadding = 0) {
+    const screenSize = Device.screenSize();
+    let screenWidth;
+
+    if (Device.isPad()) {
+      // iPad: use the shorter side (width) regardless of orientation
+      screenWidth = Math.min(screenSize.width, screenSize.height);
+    } else {
+      // iPhone: use screen width directly
+      screenWidth = screenSize.width;
+    }
+
+    const widgetSizing = config.widgetFamily || "small";
+
+    // Exact match on screen width
+    const sizeData = this.DEVICE_SIZES[screenWidth]?.[widgetSizing];
+
+    if (!sizeData) return new Size(158, 158); // fallback to default
+
+    // Apply padding adjustment separately for width and height
+    const adjustedWidth = sizeData.w - horizontalPadding * 2;
+    const adjustedHeight = sizeData.h - verticalPadding * 2;
+
+    return new Size(adjustedWidth, adjustedHeight);
   }
 }
 
@@ -199,30 +235,6 @@ class Utils {
       min: parseFloat((Math.floor(smartMin / step) * step).toFixed(precision)),
       max: parseFloat((Math.ceil(smartMax / step) * step).toFixed(precision)),
     };
-  }
-
-  static computeWidgetSize(widgetPadding) {
-    const deviceScreen = Device.screenSize();
-    let iconSize = 110;
-    let gutterSize = (deviceScreen.width - 240) / 5;
-
-    if (Device.isPad()) {
-      const width = Math.max(deviceScreen.width, deviceScreen.height);
-      iconSize = 55;
-      gutterSize = (width - 360) / 7;
-    }
-
-    const extraSize = 10 - widgetPadding;
-    const baseSize = gutterSize + iconSize + extraSize;
-
-    const widgetSizing = config.widgetFamily || "small";
-    const sizes = {
-      small: new Size(baseSize, baseSize),
-      medium: new Size(gutterSize * 3 + iconSize * 2 + extraSize, baseSize),
-      large: new Size(gutterSize * 3 + iconSize * 2 + extraSize, gutterSize * 3 + iconSize * 2 + extraSize),
-    };
-
-    return sizes[widgetSizing] || sizes.small;
   }
 }
 
@@ -508,7 +520,7 @@ class UIComponents {
     // Draw progress bar (no left padding, progress grows from left)
     const progressWidth = todayRatio * barWidth;
     if (progressWidth > 0) {
-      ctxProgress.setFillColor(ColorManager.usageProgress);
+      ctxProgress.setFillColor(ColorManager.getDrawColor('usageProgress'));
       const progressPath = new Path();
       progressPath.addRoundedRect(
         new Rect(0, 0, progressWidth, barHeight),
@@ -541,7 +553,7 @@ class UIComponents {
     const distanceBetweenLabels = maxStartX - avgEndX;
     const showMax = distanceBetweenLabels >= minLabelSpacing && max > 0;
 
-    ctxProgress.setTextColor(ColorManager.background);
+    ctxProgress.setTextColor(ColorManager.getDrawColor('background'));
     ctxProgress.setFont(Font.boldSystemFont(fontSize));
     ctxProgress.drawText(avgLabel, new Point(avgStartX, (barHeight - fontSize) / 2 - 1));
 
@@ -639,7 +651,7 @@ class ChartRenderer {
         const amount = quota / CONFIG.UNIT;
         const modelPercentage = amount / totalAmount;
         const modelStack = container.addStack();
-        modelStack.backgroundColor = ColorManager.getModelColor(modelName);
+        modelStack.backgroundColor = ModelManager.getModelColor(modelName);
         modelStack.size = new Size(barWidth, fillPercentage * maxBarHeight * modelPercentage);
       });
     }
@@ -716,9 +728,9 @@ class ChartRenderer {
       const xPos = position * (width - dotSize);
       const yPos = (rangeHeight - dotSize) / 2;
 
-      ctx.setFillColor(ColorManager.getModelColor(modelName));
+      ctx.setFillColor(ColorManager.getDrawColor(ModelManager.getModelColorKey(modelName)));
       ctx.fillEllipse(new Rect(xPos + 1, yPos + 1, dotSize - 2, dotSize - 2));
-      ctx.setStrokeColor(ColorManager.background);
+      ctx.setStrokeColor(ColorManager.getDrawColor('background'));
       ctx.setLineWidth(2);
       ctx.strokeEllipse(new Rect(xPos + 1, yPos + 1, dotSize - 2, dotSize - 2));
     });
@@ -773,10 +785,10 @@ class ChartRenderer {
     item.spacing = 4;
 
     const colorDot = item.addText("●");
-    colorDot.textColor = ColorManager.getModelColor(modelName);
+    colorDot.textColor = ModelManager.getModelColor(modelName);
     colorDot.font = Font.systemFont(8);
 
-    const nameText = item.addText(ColorManager.getSimplifiedModelName(modelName));
+    const nameText = item.addText(ModelManager.getSimplifiedModelName(modelName));
     nameText.font = Font.systemFont(10);
     nameText.textColor = ColorManager.primary;
   }
@@ -795,7 +807,7 @@ class ChartRenderer {
 
         const representativeModel = modelsOfProvider[0];
         const colorDot = providerLegend.addText("●");
-        colorDot.textColor = ColorManager.getModelColor(representativeModel);
+        colorDot.textColor = ModelManager.getModelColor(representativeModel);
         colorDot.font = Font.systemFont(10);
 
         const providerText = providerLegend.addText(provider);
@@ -812,7 +824,7 @@ class BaseWidget {
     this.user = user;
     this.data = data;
     this.dataFetcher = dataFetcher;
-    this.widgetSize = Utils.computeWidgetSize(12);
+    this.widgetSize = SizeManager.getWidgetSize(18, 12);
     this.widget = new ListWidget();
     this.widget.backgroundColor = ColorManager.background;
     this.widget.useDefaultPadding();
@@ -938,7 +950,7 @@ class MediumWidget extends BaseWidget {
   _addInfoSection(parent, weekData) {
     const infoColumn = parent.addStack();
     infoColumn.layoutVertically();
-    infoColumn.spacing = 4;
+    infoColumn.spacing = 2;
 
     const weekSpending = weekData.reduce((sum, day) => sum + day.totalQuota, 0) / CONFIG.UNIT;
     const weekTokens = weekData.reduce((sum, day) => sum + day.totalTokens, 0);
@@ -1045,7 +1057,7 @@ class LargeWidget extends BaseWidget {
     UIComponents.createInfoItem(
       mostUsedSection,
       'mostUsed',
-      ColorManager.getSimplifiedModelName(mostUsedModel),
+      ModelManager.getSimplifiedModelName(mostUsedModel),
       { iconSize: 20 }
     );
     mostUsedSection.addSpacer();
@@ -1071,10 +1083,10 @@ class LargeWidget extends BaseWidget {
           modelLegend.spacing = 4;
 
           const colorDot = modelLegend.addText("●");
-          colorDot.textColor = ColorManager.getModelColor(modelName);
+          colorDot.textColor = ModelManager.getModelColor(modelName);
           colorDot.font = Font.systemFont(10);
 
-          const nameText = modelLegend.addText(ColorManager.getSimplifiedModelName(modelName));
+          const nameText = modelLegend.addText(ModelManager.getSimplifiedModelName(modelName));
           nameText.font = Font.caption2();
           nameText.textColor = ColorManager.primary;
         }
@@ -1130,6 +1142,10 @@ class PackyUsageApp {
 
   async run() {
     try {
+      if (CONFIG.DEBUG) {
+        return this.runDebugMode();
+      }
+
       const { user, items } = await this.dataFetcher.fetchUserData();
       const processor = new DataProcessor(user, items);
       const data = processor.processData();
@@ -1144,6 +1160,45 @@ class PackyUsageApp {
       Script.setWidget(errorWidget);
       Script.complete();
     }
+  }
+
+  runDebugMode() {
+    const widget = new ListWidget();
+    widget.backgroundColor = ColorManager.background;
+    widget.useDefaultPadding();
+
+    const screenSize = Device.screenSize();
+    const isPortrait = Device.isInPortrait();
+    const widgetFamily = config.widgetFamily || 'small';
+    const actualSize = SizeManager.getWidgetSize(0, 0);
+    const sizedWithPadding = SizeManager.getWidgetSize(18, 12);
+
+    // Title
+    const title = widget.addText('🔧 DEBUG INFO');
+    title.font = Font.boldSystemFont(16);
+    title.textColor = ColorManager.primary;
+    widget.addSpacer(8);
+
+    // Debug info
+    const debugInfo = [
+      `Device: ${Device.isPad() ? 'iPad' : 'iPhone'}`,
+      `Screen: ${Math.round(screenSize.width)} × ${Math.round(screenSize.height)}`,
+      `Orientation: ${isPortrait ? 'Portrait' : 'Landscape'}`,
+      `Widget Family: ${widgetFamily}`,
+      `Actual Size: ${Math.round(actualSize.width)} × ${Math.round(actualSize.height)}`,
+      `With Padding(18,12): ${Math.round(sizedWithPadding.width)} × ${Math.round(sizedWithPadding.height)}`,
+      `User ID: ${CONFIG.USER_ID || 'Not Set'}`,
+      `Dark Mode: ${Device.isUsingDarkAppearance() ? 'Yes' : 'No'}`
+    ];
+
+    debugInfo.forEach(info => {
+      const text = widget.addText(info);
+      text.font = Font.systemFont(12);
+      text.textColor = ColorManager.secondary;
+    });
+
+    Script.setWidget(widget);
+    Script.complete();
   }
 }
 

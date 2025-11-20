@@ -1,22 +1,35 @@
 # Changelog
 
-所有对此项目的重要更改都会记录在此文件中。
+All notable changes to this project will be documented in this file.
+
+## [1.2.0] - 2025-11-21
+
+### Changed
+- **ColorManager refactored to use Proxy**: Replaced class-based implementation with JavaScript Proxy for elegant dynamic property access
+- **Unified ModelManager configuration**: Merged separate pattern arrays into single `MODEL_CONFIGS` array with `pattern`, `name`, and `colorKey` properties
+- Improved code maintainability and reduced duplication across manager classes
+
+### Technical Details
+- ColorManager is now a Proxy object that dynamically provides color properties
+- All model configurations centralized in unified structure for easier maintenance
+- Added `getModelConfig()` as internal helper method for pattern-based model lookups
+- Removed redundant methods and simplified color/model management logic
 
 ## [1.1.0] - 2025-11-20
 
 ### Added
-- 完整的中文文档支持 (README.zh-CN.md)
-- 所有 45 个 AI 模型的完整颜色和简化名称映射
-- 改进的模型名称简化逻辑，支持更细致的分类
-- 新增 Gemini 3 系列模型支持 (gemini-3-pro 及其变体)
+- Full Chinese documentation support (README.zh-CN.md)
+- Complete color and simplified name mappings for all 45 AI models
+- Improved model name simplification logic with more detailed categorization
+- New Gemini 3 series model support (gemini-3-pro and its variants)
 
 ### Changed
-- 进度条渲染优化 - 使用 DrawContext 绘制路径替代 Stack 叠加
-- 范围指示器布局改进 - 模型点显示更加均匀分布
+- Progress bar rendering optimization - Using DrawContext path drawing instead of Stack overlay
+- Range indicator layout improvements - More evenly distributed model point display
 
 ### Model Support
-- 新增 GPT 5.1 Codex 的所有变体 (mini, max, max-high, max-xhigh)
-- 新增 Gemini 3 Pro 系列 (low, high, preview)
+- Added all GPT 5.1 Codex variants (mini, max, max-high, max-xhigh)
+- Added Gemini 3 Pro series (low, high, preview)
 
 ---
 
